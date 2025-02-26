@@ -1,0 +1,77 @@
+# Puppeteer Auto-Visit Bot
+
+This is a Node.js-based Puppeteer bot that automates website visits at scheduled intervals. It supports handling cookies for authenticated sessions and includes an Express server to keep the bot running on hosting platforms like Render.
+
+## Features
+- Uses Puppeteer to visit a website automatically.
+- Supports authentication via cookies.
+- Runs an Express server to keep the service active.
+- Works with Render and UptimeRobot for continuous execution.
+
+## Installation
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/your-repo.git
+   cd your-repo
+   ```
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+
+## Extracting Cookies (For Authenticated Sessions)
+If the site requires authentication, you need to extract cookies before running the bot.
+
+1. **Run `save-cookies.js` to log in manually and save cookies:**
+   ```sh
+   node save-cookies.js
+   ```
+2. **Follow the on-screen instructions:**
+   - The script will open the login page in a browser.
+   - Log in manually within 2 minutes.
+   - Once logged in, the cookies will be saved to `cookies.json`.
+
+## Running the Auto-Visit Bot
+
+After extracting cookies (if needed), run the main script:
+```sh
+npm start
+```
+
+or
+
+```sh
+node auto-visit.js
+```
+
+## Keeping the Bot Alive
+Since the bot runs on intervals, hosting platforms like Render might stop the service when inactive. To prevent this:
+
+- **Deploy the bot on Render.** Ensure the Express server is running to keep the instance alive.
+- **Use UptimeRobot** to ping the server periodically and keep it active.
+
+## Deployment on Render
+1. Push the project to GitHub.
+2. Deploy it as a Node.js service on Render.
+3. Add environment variables if needed.
+4. Ensure the Express server is running to prevent Render from shutting it down.
+
+## Environment Variables
+You may need to define these in your hosting service:
+```sh
+PORT=3000
+COOKIES=[your_saved_cookies]
+```
+
+## Troubleshooting
+- **Cookies not working?** Run `save-cookies.js` again and update the cookies in `cookies.json`.
+- **Render logs show no open ports?** Make sure the Express server is running (`express` should be installed).
+- **Navigation timeout errors?** Increase the timeout in `page.goto()` like this:
+  ```js
+  await page.goto('https://example.com', { waitUntil: 'networkidle2', timeout: 60000 });
+  ```
+
+## License
+This project is open-source under the MIT License.
+

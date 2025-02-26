@@ -1,36 +1,53 @@
-const puppeteer = require('puppeteer');
-const fs = require('fs');
+const puppeteer = require("puppeteer");
+const express = require("express");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ✅ Express server to prevent Render port errors
+app.get("/", (req, res) => res.send("Puppeteer script is running..."));
+app.listen(PORT, () => console.log(Server running on port ${PORT}));
+
+// ✅ Debugging - Check environment variable
+console.log("Type of COOKIES:", typeof process.env.COOKIES);
+console.log("Raw COOKIES from env:", process.env.COOKIES);
+
+let cookies;
+try {
+    // Ensure it's parsed only once
+    if (typeof process.env.COOKIES === "string") {
+        cookies = JSON.parse(process.env.COOKIES);
+    } else {
+        cookies = process.env.COOKIES; // Already parsed
+    }
+    console.log("✅ Parsed Cookies:", cookies);
+} catch (error) {
+    console.error("❌ Failed to parse cookies:", error);
+    process.exit(1);
+}
 
 (async () => {
-    while (true) {
-        const browser = await puppeteer.launch({ headless: true }); // Runs in the background
-        const page = await browser.newPage();
+    console.log("Starting browser...");
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
 
-        const cookiesFilePath = 'cookies.json';
-
-        // Load saved cookies
-        if (fs.existsSync(cookiesFilePath)) {
-            const cookies = JSON.parse(fs.readFileSync(cookiesFilePath, 'utf8'));
-            await page.setCookie(...cookies);
-        } else {
-            console.log("No saved cookies found. Please run save_cookies.js first.");
-            process.exit(1);
-        }
-
-        // Visit the required page
-        await page.goto('https://optiklink.com/', { waitUntil: 'networkidle2' });
-
-        console.log('Visited successfully! Staying on the page for 2 minutes...');
-
-        // Stay on the page for 2 minutes (120,000 milliseconds)
-        await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000));
-
-        await browser.close();
-        console.log('Browser closed.');
-
-        console.log('Waiting 12 hours before next visit...');
-        
-        // Wait for 12 hours (12 * 60 * 60 * 1000 milliseconds)
-        await new Promise(resolve => setTimeout(resolve, 12 * 60 * 60 * 1000));
+    // ✅ Only set cookies if correctly parsed
+    if (Array.isArray(cookies) && cookies.length > 0) {
+        await page.setCookie(...cookies);
+        console.log("✅ Cookies applied to browser");
+    } else {
+        console.log("❌ No valid cookies found. Exiting...");
+        process.exit(1);
     }
+
+    await page.goto("https://optiklink.com", { waitUntil: "networkidle2", timeout: 60000 });
+
+    console.log("Visited successfully! Staying on the page for 2 minutes...");
+    await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000));
+
+    await browser.close();
+    console.log("Browser closed.");
+
+    console.log("Waiting 12 hours before next visit...");
+    await new Promise(resolve => setTimeout(resolve, 12 * 60 * 60 * 1000));
 })();
