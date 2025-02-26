@@ -8,7 +8,7 @@ const fs = require('fs');
     const cookiesFilePath = 'cookies.json';
 
     console.log("Opening login page...");
-    await page.goto('https://optiklink.com/auth', { waitUntil: 'domcontentloaded' });
+    await page.goto('https://optiklink.com/', { waitUntil: 'domcontentloaded' });
 
     console.log("Please log in manually... You have 2 minutes.");
     
